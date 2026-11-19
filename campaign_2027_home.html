@@ -48,18 +48,30 @@
     <a class="chest-logo" href="https://www.chest.or.kr/">
       <img src="./img/logo_default.png" />
     </a>
-    <a class="btn-goto-home" href="https://www.chest.or.kr/">
-      홈페이지 바로가기
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M5 14L11 8L5 2" stroke="#33363D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </a>
+    <div class="header-actions">
+      <div class="region-dropdown" id="region-dropdown">
+        <button type="button" class="btn-region-toggle" aria-haspopup="listbox" aria-expanded="false">
+          <span class="region-label" id="region-dropdown-label">중앙회</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 5L8 11L14 5" stroke="#33363D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <ul class="region-list" role="listbox" id="region-dropdown-list" data-lenis-prevent></ul>
+      </div>
+      <a class="btn-goto-home" href="https://www.chest.or.kr/">
+        홈페이지
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5 14L11 8L5 2" stroke="#33363D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
   </header>
 
   <div class="content-wrap">
     <section class="section section-1">
       <div class="hero-copy-wrap">
-        <img src="./img/hero_copy.png" />
+        <img src="./img/head_center.png" id="branch-head" />
+        <img src="./img/head_copy_text.png" />
       </div>
       <div class="model-pict">
         <img src="./img/model_1.png" />
@@ -92,7 +104,7 @@
         </div>
         <div class="panel panel-banner">
           <a href="#">
-            <img src="./img/event_banner.png">
+            <img src="./img/banner_center.png" id="banner-branch">
           </a>
         </div>
         <button class="panel btn-goto-down">
@@ -179,7 +191,7 @@
 <script>
   // 온도탑 설정
   window.TOTAL_DATA = {
-    name:'전국', temp:50.5, amount:2728.5
+    name:'중앙회', temp:50.5, amount:2728.5
   }
 
   // 지역별 데이터 (키 = #korea-map path의 data-region) — 더미값
@@ -187,21 +199,22 @@
   window.REGION_DATA = {
     seoul:          { name: '서울', temp: 32.4, amount: 1850.5 },
     busan:          { name: '부산', temp: 28.7, amount: 1285.5 },
-    daegu:          { name: '대구', temp: 26.1, amount: 85.5 },
-    incheon:        { name: '인천', temp: 30.2, amount: 85.5 },
-    gwangju:        { name: '광주', temp: 27.5, amount: 85.5 },
-    daejeon:        { name: '대전', temp: 24.8, amount: 85.5 },
-    ulsan:          { name: '울산', temp: 29.3, amount: 85.5 },
-    sejong:         { name: '세종', temp: 21.6, amount: 85.5 },
-    gyeonggi:       { name: '경기', temp: 31.8, amount: 85.5 },
-    gangwon:        { name: '강원', temp: 25.9, amount: 85.5 },
-    chungcheongbuk: { name: '충북', temp: 23.4, amount: 85.5 },
-    chungcheongnam: { name: '충남', temp: 26.7, amount: 85.5 },
-    jeonlabuk:      { name: '전북', temp: 22.9, amount: 85.5 },
-    jeonlanam:      { name: '전남', temp: 27.2, amount: 85.5 },
-    gyeongsangbuk:  { name: '경북', temp: 24.3, amount: 85.5 },
-    gyeongsangnam:  { name: '경남', temp: 28.1, amount: 85.5 },
-    jeju:           { name: '제주', temp: 33.5, amount: 85.5 },
+    daegu:          { name: '대구', temp: 26.1, amount: 105.5 },
+    incheon:        { name: '인천', temp: 30.2, amount: 45.5 },
+    gwangju:        { name: '광주', temp: 27.5, amount: 95.5 },
+    daejeon:        { name: '대전', temp: 24.8, amount: 185.5 },
+    ulsan:          { name: '울산', temp: 29.3, amount: 125.5 },
+    gyeonggi:       { name: '경기', temp: 31.8, amount: 25.5 },
+    // gyeonggibuk:    { name: '경기북부', temp: 58.8, amount: 88.5 },
+    gangwon:        { name: '강원', temp: 25.9, amount: 99.5 },
+    chungcheongbuk: { name: '충북', temp: 23.4, amount: 130 },
+    chungcheongnam: { name: '충남', temp: 26.7, amount: 28 },
+    jeonlabuk:      { name: '전북', temp: 22.9, amount: 553 },
+    jeonlanam:      { name: '전남', temp: 27.2, amount: 911 },
+    gyeongsangbuk:  { name: '경북', temp: 24.3, amount: 21 },
+    gyeongsangnam:  { name: '경남', temp: 28.1, amount: 900 },
+    jeju:           { name: '제주', temp: 33.5, amount: 200 },
+    sejong:         { name: '세종', temp: 21.6, amount: 105.5 }
   };
 </script>
 <script type="module" src="./js/home.js"></script>

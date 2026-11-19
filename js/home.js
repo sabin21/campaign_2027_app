@@ -133,8 +133,7 @@ function startTimeline(){
 
   // 인트로 종료 후: 숫자 반영 + 스크롤이 타임라인의 스크롤 구간을 제어
   const afterIntro = () => {
-    tower3D?.setTemp(initialTemp);   // 인트로 종료 → 온도계를 TOTAL_DATA.temp로
-    countUpTotalPanel();             // 인트로 종료 → 패널 숫자를 TOTAL_DATA 값으로
+    countUpTotalPanel();             // 인트로 종료 → 패널 숫자 + 온도탑(선택 지역 온도) 반영
     const seek = (progress) => gsap.to(tl, {
       time: introEnd + progress * scrollLen,
       duration: 1, ease: 'power1.out', overwrite: true,   // scrub: 1 과 같은 부드러운 추종
@@ -194,22 +193,50 @@ const panelTotalAmountEl = document.getElementById('panel-total-amount');
 const tower2dGaugeEl = document.querySelector('.tower-gauge');   // 2D 온도탑 게이지 (0~100도 → 0~310px)
 const GAUGE_MAX_HEIGHT = 310;
 
-function countUpTotalPanel(){
-  const totalAmount = Number(window.TOTAL_DATA?.amount);
-  const counter = { temp: 0, amount: 0 };
-  gsap.to(counter, {
-    temp: initialTemp,
-    amount: Number.isFinite(totalAmount) ? totalAmount : 0,
-    duration: 1.5,
-    ease: 'power2.out',
-    onUpdate: () => {
-      const tempText = counter.temp.toFixed(1);
-      if (panelTotalTempEl) panelTotalTempEl.textContent = tempText;
-      if (tower2dTempEl) tower2dTempEl.textContent = tempText;
-      if (tower2dGaugeEl) tower2dGaugeEl.style.height = (Math.min(100, Math.max(0, counter.temp)) / 100 * GAUGE_MAX_HEIGHT) + 'px';
-      if (panelTotalAmountEl) panelTotalAmountEl.textContent = amountFormat.format(counter.amount);   // 억원 단위
-    },
+// 표시 데이터(온도탑 3D/2D + 패널 온도·모금액): 기본은 중앙회(TOTAL_DATA), 상단 드랍다운에서 지역 선택 시 해당 지역 값
+const totalAmountRaw = Number(window.TOTAL_DATA?.amount);
+const initialAmount = Number.isFinite(totalAmountRaw) ? totalAmountRaw : 0;
+let towerTemp = initialTemp;
+let panelAmount = initialAmount;
+let towerTempReady = false;   // 인트로 종료(숫자 반영 시점) 이후 true → 그 전에 선택하면 값만 저장
+const tower2dCounter = { temp: 0 };
+const amountCounter = { amount: 0 };
+
+function renderTower2D(){
+  const t = tower2dCounter.temp;
+  const tempText = t.toFixed(1);
+  if (tower2dTempEl) tower2dTempEl.textContent = tempText;
+  if (panelTotalTempEl) panelTotalTempEl.textContent = tempText;   // 패널 '현재 나눔온도'도 같은 값
+  if (tower2dGaugeEl) tower2dGaugeEl.style.height = (Math.min(100, Math.max(0, t)) / 100 * GAUGE_MAX_HEIGHT) + 'px';
+}
+
+function renderAmount(){
+  if (panelTotalAmountEl) panelTotalAmountEl.textContent = amountFormat.format(amountCounter.amount);   // 억원 단위
+}
+
+// 현재 값에서 towerTemp / panelAmount 로 카운트업
+// (3D: 게이지·간판, 2D: 간판 숫자·게이지, 패널: 현재 나눔온도·모금액)
+function applyTowerData(){
+  tower3D?.setTemp(towerTemp);
+  gsap.to(tower2dCounter, {
+    temp: towerTemp, duration: 1.5, ease: 'power2.out',
+    overwrite: true, onUpdate: renderTower2D,
   });
+  gsap.to(amountCounter, {
+    amount: panelAmount, duration: 1.5, ease: 'power2.out',
+    overwrite: true, onUpdate: renderAmount,
+  });
+}
+
+function setTowerData(temp, amount){
+  if (Number.isFinite(temp)) towerTemp = temp;
+  if (Number.isFinite(amount)) panelAmount = amount;
+  if (towerTempReady) applyTowerData();
+}
+
+function countUpTotalPanel(){
+  towerTempReady = true;
+  applyTowerData();
 }
 
 function selectRegion(path){
@@ -230,5 +257,72 @@ koreaMap?.addEventListener('click', (e) => {
 // 초기 표시: 서울
 const initialRegion = koreaMap?.querySelector('path[data-region="seoul"]');
 if (initialRegion) selectRegion(initialRegion);
+
+// 상단 지역 드랍다운: 기본값 '중앙회' + window.REGION_DATA의 17개 지역
+// 선택 시 document에 'region-dropdown-change' 이벤트 발생 (detail.key: 'total' 또는 지역 키)
+const regionDropdown = document.getElementById('region-dropdown');
+if (regionDropdown){
+  const toggleBtn = regionDropdown.querySelector('.btn-region-toggle');
+  const labelEl = document.getElementById('region-dropdown-label');
+  const listEl = document.getElementById('region-dropdown-list');
+  const options = [
+    { key: 'total', name: window.TOTAL_DATA?.name || '중앙회' },
+    ...Object.entries(window.REGION_DATA || {}).map(([key, d]) => ({ key, name: d.name })),
+  ];
+
+  listEl.innerHTML = options.map((o, i) =>
+    // 지역명 뒤에 '지회' 표시 (중앙회 제외)
+    `<li role="option" data-key="${o.key}"${i === 0 ? ' class="selected" aria-selected="true"' : ''}>${o.name}${o.key === 'total' ? '' : '지회'}</li>`
+  ).join('');
+  labelEl.textContent = options[0].name;
+
+  const setOpen = (open) => {
+    regionDropdown.classList.toggle('open', open);
+    toggleBtn.setAttribute('aria-expanded', String(open));
+  };
+
+  toggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setOpen(!regionDropdown.classList.contains('open'));
+  });
+
+  listEl.addEventListener('click', (e) => {
+    const li = e.target.closest('li[data-key]');
+    if (!li) return;
+    listEl.querySelector('li.selected')?.removeAttribute('aria-selected');
+    listEl.querySelector('li.selected')?.classList.remove('selected');
+    li.classList.add('selected');
+    li.setAttribute('aria-selected', 'true');
+    labelEl.textContent = li.textContent;   // 버튼 라벨도 목록과 동일 ('서울지회', 중앙회는 그대로)
+    setOpen(false);
+    // 선택 지역 온도·모금액을 온도탑/패널에 적용 (중앙회 = TOTAL_DATA)
+    const key = li.dataset.key;
+    const region = window.REGION_DATA?.[key];
+    if (key === 'total') setTowerData(initialTemp, initialAmount);
+    else setTowerData(Number(region?.temp), Number(region?.amount));
+    // 모금액 패널 제목: 중앙회 = '전국 모금액', 지역 = '{지역} 모금액'
+    const amountTitle = document.querySelector('.panel-amount .title');
+    if (amountTitle) amountTitle.textContent = `${key === 'total' ? '전국' : region?.name} 모금액`;
+    // 지회 헤드 이미지 교체: head_{지역키}.png (중앙회 = head_center.png)
+    // 지회 배너 이미지 교체: banner_{지역키}.png (중앙회 = banner_center.png)
+    const imgKey = key === 'total' ? 'center' : key;
+    const branchHead = document.getElementById('branch-head');
+    if (branchHead) branchHead.src = `./img/head_${imgKey}.png`;
+    const bannerBranch = document.getElementById('banner-branch');
+    if (bannerBranch) bannerBranch.src = `./img/banner_${imgKey}.png`;
+    // 아래 지역 지도도 같은 지역을 활성화 (중앙회 선택 시 초기값인 서울로 복귀)
+    const mapKey = key === 'total' ? 'seoul' : key;
+    const mapPath = koreaMap?.querySelector(`path[data-region="${mapKey}"]`);
+    if (mapPath) selectRegion(mapPath);
+    document.dispatchEvent(new CustomEvent('region-dropdown-change', { detail: { key } }));
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!regionDropdown.contains(e.target)) setOpen(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setOpen(false);
+  });
+}
 
 init();
