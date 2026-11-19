@@ -250,7 +250,7 @@ html{ overflow-x:hidden; }
 
 .hero-content{
   position: fixed; width:320px; display: flex; flex-direction: column; gap: 10px;
-  right: calc(50% - 680px); bottom: calc(50% - 300px);
+  right: calc(50% - 680px); top: calc(50% - 240px);
   >.panel {
     position: relative; width:100%; border-radius: 12px; font-weight: 700;
     font-size: 20px; padding: 28px 32px; background-color: white;
@@ -286,10 +286,13 @@ html{ overflow-x:hidden; }
   }
   >.panel-banner{
     padding: 0; background-color: transparent;
-    a{
-      display: block; width:100%;
-      >img { max-width: 100%;}
-    }  
+    #banner-branch{ max-width: 100%;}
+    >.panel-banner-wrap{
+      width:100%; display: flex; flex-direction: column;
+      gap: 8px;
+      >.banner-optional{
+        display: none;
+      }    }
   }
   >.btn-goto-down{ 
     outline: none; border: 1px solid transparent; display: flex;
