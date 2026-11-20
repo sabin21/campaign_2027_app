@@ -249,9 +249,15 @@ function selectRegion(path){
   localAmountEl.textContent = amountFormat.format(data.amount);   // 억원 단위
 }
 
+// 지역(지회) 선택 공통 처리 — 드랍다운 블록에서 할당. 지도 클릭 시에도 같은 처리를 사용해
+// 드랍다운 선택·온도탑·패널·이미지가 함께 바뀜
+let selectBranch = null;
+
 koreaMap?.addEventListener('click', (e) => {
   const path = e.target.closest('path[data-region]');
-  if (path) selectRegion(path);
+  if (!path) return;
+  if (selectBranch) selectBranch(path.dataset.region);
+  else selectRegion(path);
 });
 
 // 초기 표시: 서울
@@ -286,8 +292,9 @@ if (regionDropdown){
     setOpen(!regionDropdown.classList.contains('open'));
   });
 
-  listEl.addEventListener('click', (e) => {
-    const li = e.target.closest('li[data-key]');
+  // key: 'total'(중앙회) 또는 REGION_DATA 지역 키
+  selectBranch = (key) => {
+    const li = listEl.querySelector(`li[data-key="${key}"]`);
     if (!li) return;
     listEl.querySelector('li.selected')?.removeAttribute('aria-selected');
     listEl.querySelector('li.selected')?.classList.remove('selected');
@@ -296,7 +303,6 @@ if (regionDropdown){
     labelEl.textContent = li.textContent;   // 버튼 라벨도 목록과 동일 ('서울지회', 중앙회는 그대로)
     setOpen(false);
     // 선택 지역 온도·모금액을 온도탑/패널에 적용 (중앙회 = TOTAL_DATA)
-    const key = li.dataset.key;
     const region = window.REGION_DATA?.[key];
     if (key === 'total') setTowerData(initialTemp, initialAmount);
     else setTowerData(Number(region?.temp), Number(region?.amount));
@@ -315,6 +321,11 @@ if (regionDropdown){
     const mapPath = koreaMap?.querySelector(`path[data-region="${mapKey}"]`);
     if (mapPath) selectRegion(mapPath);
     document.dispatchEvent(new CustomEvent('region-dropdown-change', { detail: { key } }));
+  };
+
+  listEl.addEventListener('click', (e) => {
+    const li = e.target.closest('li[data-key]');
+    if (li) selectBranch(li.dataset.key);
   });
 
   document.addEventListener('click', (e) => {
