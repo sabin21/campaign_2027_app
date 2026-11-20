@@ -249,6 +249,7 @@ export function loadTower({ onProgress } = {}){
           tl
             .to(basePos, { x: center.x, y: center.y - 2 , z: center.z + r * 2.2 }, 0)
             .to(lookTarget, { y: center.y + 0.2 }, 0)
+            .to(scrollCam, { shift: -0.05 }, 0)   // 인트로 종료 시 탑을 화면 폭의 5%만큼 왼쪽으로
             .to(tower.rotation, { y: Math.PI * 2.1, duration: 2, ease: 'power1.inOut' }, 2);
         },
         // 스크롤 구간: 카메라를 당기고 돌려 탑을 화면 오른쪽 위로

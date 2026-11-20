@@ -208,8 +208,8 @@ html{ overflow-x:hidden; }
     }
   }
   >.model-pict{
-    position: fixed; width:408px; height: 504px;
-    right: calc(50% - 500px); bottom: calc(50% - 400px);
+    position: fixed; width:408px; height: 546px;
+    right: calc(50% - 460px); bottom: calc(50% - 400px);
     >img{ max-width: 100%;} 
   } 
 }
