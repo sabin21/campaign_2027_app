@@ -356,10 +356,14 @@ html{ overflow-x:hidden; }
 .local-map-title {
   position: fixed; width: 340px;
   left: calc(50% - 620px); top: calc(50% - 300px);
+  display: flex; 
   >img{max-width: 100%;}
   >.btn-goto-back{
     background-color: transparent; border:none; cursor: pointer;
     position: absolute; left: -44px; top: 5px;
+    &.two {
+      position: relative; left:auto; top: auto; margin-left:-72px;
+    }
   }
 }
 .map-wrap{
