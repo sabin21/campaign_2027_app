@@ -226,8 +226,8 @@ html{ overflow-x:hidden; }
       transform: scale(1);
     }
     >.model-pict{
-      position: absolute; width:408px; height: 504px;
-      right: calc(50% - 460px); bottom: auto; top: 500px;
+      position: absolute; width:200px; height: 504px;
+      right: calc(50% - 360px); bottom: auto; top: 580px;
       >img{ max-width: 100%;} 
     } 
   }
